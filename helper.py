@@ -1,3 +1,5 @@
+import datetime
+
 import cv2
 
 
@@ -13,3 +15,11 @@ def create_video_writer(video_cap, output_filename):
                              (frame_width, frame_height))
 
     return writer
+
+
+def _draw_fps(frame, start):
+    """Compute and draw FPS on the frame."""
+    end = datetime.datetime.now()
+    fps = f"FPS: {1 / (end - start).total_seconds():.2f}"
+    cv2.putText(frame, fps, (50, 50),
+                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 8)
