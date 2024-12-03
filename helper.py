@@ -1,25 +1,31 @@
 import datetime
-
 import cv2
+import os
 
 
 def create_video_writer(video_cap, output_filename):
-    # grab the width, height, and fps of the frames in the video stream.
     frame_width = int(video_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(video_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = int(video_cap.get(cv2.CAP_PROP_FPS))
+    fps = int(video_cap.get(cv2.CAP_PROP_FPS) or 30)  # Використання стандартного FPS, якщо значення невідоме
 
-    # initialize the FourCC and a video writer object
-    fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-    writer = cv2.VideoWriter(output_filename, fourcc, fps,
-                             (frame_width, frame_height))
-
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')  # H.264
+    writer = cv2.VideoWriter(output_filename, fourcc, fps, (frame_width, frame_height))
+    if not writer.isOpened():
+        raise IOError(f"Failed to open VideoWriter for {output_filename}")
     return writer
 
 
-def _draw_fps(frame, start):
-    """Compute and draw FPS on the frame."""
-    end = datetime.datetime.now()
-    fps = f"FPS: {1 / (end - start).total_seconds():.2f}"
-    cv2.putText(frame, fps, (50, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 8)
+def save_screenshot(frame, screenshot_dir):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    screenshot_path = os.path.join(screenshot_dir, f"screenshot_{timestamp}.png")
+    cv2.imwrite(screenshot_path, frame)
+    print(f"Screenshot saved to {screenshot_path}")
+
+
+def calculate_fps(prev_time):
+    elapsed_time = (datetime.datetime.now() - prev_time).total_seconds()
+    return 1 / elapsed_time if elapsed_time > 0 else 0
+
+
+def draw_text(frame, text, position, color):
+    cv2.putText(frame, text, position, cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
