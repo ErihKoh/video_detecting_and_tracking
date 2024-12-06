@@ -5,11 +5,9 @@ import cv2
 
 
 class ObjectDetectionGUI(QMainWindow):
-    def __init__(self, video_processor, logger, object_detector):
+    def __init__(self, app):
         super().__init__()
-        self.video_processor = video_processor
-        self.logger = logger
-        self.object_detector = object_detector
+        self.app = app
         self.running = True
 
         # Налаштування вікна
@@ -60,10 +58,10 @@ class ObjectDetectionGUI(QMainWindow):
         if not self.running:
             return
 
-        ret, frame = self.video_processor.video_cap.read()
+        ret, frame = self.app.video_cap.read()
         if ret:
-            processed_frame = self.object_detector.detect_objects(frame)
-            frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+            frame = self.app.process_frame()
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Перетворення у QImage
             height, width, channel = frame.shape
@@ -79,28 +77,30 @@ class ObjectDetectionGUI(QMainWindow):
             ))
 
     def start_recording(self):
-        if self.video_processor.is_recording:
+        if self.app.video_recorder.is_recording:
             QMessageBox.warning(self, "Recording", "Recording is already in progress!")
         else:
-            self.video_processor.start_recording()
+            self.app.toggle_recording()
             QMessageBox.information(self, "Recording", "Recording started.")
 
     def stop_recording(self):
-        if not self.video_processor.is_recording:
+        if not self.app.video_recorder.is_recording:
             QMessageBox.warning(self, "Recording", "Recording is not active!")
         else:
-            self.video_processor.stop_recording()
+            self.app.toggle_recording()
             QMessageBox.information(self, "Recording", "Recording stopped.")
 
     def take_screenshot(self):
-        ret, frame = self.video_processor.read_frame()
+        ret, frame = self.app.video_cap.read()
         if ret:
-            self.logger.save_screenshot(frame)
+            self.app.save_screenshot(frame)
             QMessageBox.information(self, "Screenshot", "Screenshot saved successfully!")
         else:
             QMessageBox.warning(self, "Screenshot", "Failed to capture screenshot.")
 
     def quit_application(self):
         self.running = False
-        self.video_processor.release_resources()
+        self.app.video_cap.release()
+        if self.app.video_recorder.writer is not None:
+            self.app.writer.release()
         self.close()
