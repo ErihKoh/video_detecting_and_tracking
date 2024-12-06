@@ -2,20 +2,14 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from object_detection import ObjectDetectionAndTracking
 from object_detection_gui import ObjectDetectionGUI  # Імпортуємо GUI із окремого файлу
+from utils import detection_params
 
 
-def main():
-    # Параметри для ObjectDetectionAndTracking
-    model_path = "yolov8n.pt"  # Замініть на шлях до вашої моделі
-    video_source = 1  # Використовується камера за замовчуванням
-    confidence_threshold = 0.7  # Порог впевненості для детекції
-
+def main(params):
     try:
         # Ініціалізація об'єкта детекції
         detection_app = ObjectDetectionAndTracking(
-            model_path=model_path,
-            video_source=video_source,
-            confidence_threshold=confidence_threshold,
+            *params
         )
 
         # Ініціалізація PyQt застосунку
@@ -31,4 +25,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(detection_params)
