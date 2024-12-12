@@ -26,12 +26,14 @@ class ObjectTracking:
         for track in tracks:
             if not track.is_confirmed():
                 continue
-            track_id = track.track_id
-            center_x = int((track.to_tlbr()[0] + track.to_tlbr()[2]) / 2)
-            center_y = int((track.to_tlbr()[1] + track.to_tlbr()[3]) / 2)
-            if track_id not in self.trajectories:
-                self.trajectories[track_id] = []
-            self.trajectories[track_id].append((center_x, center_y))
+            for _ in range(100):
+                track_id = track.track_id
+                center_x = int((track.to_tlbr()[0] + track.to_tlbr()[2]) / 2)
+                center_y = int((track.to_tlbr()[1] + track.to_tlbr()[3]) / 2)
+
+                if track_id not in self.trajectories:
+                    self.trajectories[track_id] = []
+                self.trajectories[track_id].append((center_x, center_y))
 
     def _draw_tracks(self, frame, tracks):
         """Малювання треків на кадрі."""
@@ -52,4 +54,3 @@ class ObjectTracking:
                     points = self.trajectories[track_id]
                     for i in range(1, len(points)):
                         cv2.line(frame, points[i - 1], points[i], self.RED, 2)
-
