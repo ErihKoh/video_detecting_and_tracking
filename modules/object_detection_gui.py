@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QMessageBox, \
+    QFormLayout, QGroupBox, QSpinBox, QSlider
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer, Qt
 import cv2
@@ -22,6 +23,7 @@ class ObjectDetectionGUI(QMainWindow):
         self.video_label = QLabel(self)
         self.video_label.setStyleSheet("background-color: black;")
         self.video_label.setAlignment(Qt.AlignCenter)
+        self.video_label.setMinimumSize(1024, 576)
 
         # Кнопки
         self.start_button = QPushButton("Start Recording")
@@ -43,10 +45,31 @@ class ObjectDetectionGUI(QMainWindow):
         buttons_layout.addWidget(self.screenshot_button)
         buttons_layout.addWidget(self.quit_button)
 
+        # Параметри управління
+        self.confidence_slider = QSlider(Qt.Horizontal)
+        self.confidence_slider.setMinimum(1)
+        self.confidence_slider.setMaximum(100)
+        self.confidence_slider.setValue(int(self.app.confidence_threshold * 100))
+        self.confidence_slider.valueChanged.connect(self.update_confidence_threshold)
+        self.confidence_slider.setFixedSize(200, 20)  # Ширина: 200 пікселів, висота: 20 пікселів
+
+        self.confidence_label = QLabel(f"Conf. Threshold: {self.app.confidence_threshold:.2f}")
+        self.confidence_label.setAlignment(Qt.AlignCenter)
+
+        # Макет управління параметрами
+        parameter_layout = QVBoxLayout()
+        parameter_layout.addWidget(QLabel("Conf. Threshold:"))
+        parameter_layout.addWidget(self.confidence_slider)
+        parameter_layout.addWidget(self.confidence_label)
+
+        parameter_group = QGroupBox("Detection Parameters")
+        parameter_group.setLayout(parameter_layout)
+
         # Основний макет
         layout = QVBoxLayout(self.central_widget)
         layout.addWidget(self.video_label)
         layout.addLayout(buttons_layout)
+        layout.addWidget(parameter_group)
 
         # Таймер для оновлення відео
         self.timer = QTimer(self)
@@ -97,6 +120,12 @@ class ObjectDetectionGUI(QMainWindow):
             QMessageBox.information(self, "Screenshot", "Screenshot saved successfully!")
         else:
             QMessageBox.warning(self, "Screenshot", "Failed to capture screenshot.")
+
+    def update_confidence_threshold(self):
+        """Оновлення порогу довіри."""
+        new_threshold = self.confidence_slider.value() / 100.0
+        self.app.confidence_threshold = new_threshold
+        self.confidence_label.setText(f"Confidence Threshold: {new_threshold:.2f}")
 
     def quit_application(self):
         self.running = False

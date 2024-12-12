@@ -23,8 +23,14 @@ def save_screenshot(frame, screenshot_dir):
 
 
 def calculate_fps(prev_time):
-    elapsed_time = (datetime.datetime.now() - prev_time).total_seconds()
-    return 1 / elapsed_time if elapsed_time > 0 else 0
+    elapsed_time = 0
+    num_frames = 100  # Test on 100 frames for stability
+
+    for _ in range(num_frames):
+        elapsed_time += (datetime.datetime.now() - prev_time).total_seconds()
+
+    avg_time_per_frame = elapsed_time / num_frames
+    return 1 / avg_time_per_frame
 
 
 def draw_text(frame, text, position, color):

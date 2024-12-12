@@ -1,11 +1,10 @@
-import os
 import datetime
 import cv2
 import torch
 from ultralytics import YOLO
 
 from utils.helper import calculate_fps, draw_text, filter_image, draw_datetime
-from utils.config import classes
+from utils.config import classes, colors
 
 
 class ObjectDetectionAndTracking:
@@ -15,8 +14,8 @@ class ObjectDetectionAndTracking:
         self.output_dir = output_dir
         self.logger = logger
         self.confidence_threshold = confidence_threshold
-        self.RED = (0, 0, 255)
-        self.GREEN = (0, 255, 0)
+        self.RED = colors.get('RED')
+        self.GREEN = colors.get('GREEN')
 
         # Ініціалізація пристрою для обчислень
         self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
